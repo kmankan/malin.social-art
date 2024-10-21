@@ -9,8 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@react-three/drei": "9.92.0",
-    "@react-three/fiber": "8.15.12",
+    "@react-three/drei": "9.114.6",
+    "@react-three/fiber": "8.17.10",
     "@react-three/postprocessing": "2.7.0",
     "@react-three/rapier": "0.8.2",
     "axios": "^1.7.7",
