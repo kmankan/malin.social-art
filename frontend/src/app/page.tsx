@@ -17,7 +17,7 @@ export default function Home() {
       </main>
 
       <footer className="p-4 bg-gray-100 text-center">
-        <p>&copy; 2024 My App. All rights reserved.</p>
+        <p>&copy; Social Art Platform. All rights reserved.</p>
       </footer>
     </div>
   );
