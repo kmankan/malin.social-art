@@ -12,7 +12,13 @@
     "axios": "^1.7.7",
     "next": "14.2.15",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "@react-three/drei": "9.36.0",
+    "@react-three/fiber": "8.8.10",
+    "@react-three/postprocessing": "2.7.0",
+    "@react-three/rapier": "0.8.2",
+    "react-scripts": "5.0.1",
+    "three": "0.145.0"
   },
   "devDependencies": {
     "typescript": "^5",
