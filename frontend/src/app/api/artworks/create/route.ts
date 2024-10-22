@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client';
-
-// Initialize PrismaClient
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db"
 
 // This route handles POST requests to /artworks/create
 
@@ -17,8 +14,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-
-
     // Add the artwork to the database using prisma
     const newArtwork = await prisma.artwork.create({
       data: {
@@ -29,9 +24,6 @@ export async function POST(request: Request) {
         likes: 0, // Initialize likes to 0
       },
     });
-
-    // Close the Prisma connection
-    await prisma.$disconnect();
 
     return NextResponse.json(newArtwork, { status: 201 });
   } catch (error) {
