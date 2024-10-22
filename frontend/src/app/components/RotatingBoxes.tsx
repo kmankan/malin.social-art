@@ -13,6 +13,15 @@ interface BoxConfig {
   isSelected: boolean;
 }
 
+// Types for saving animation state
+interface AnimationState {
+  backgroundColor: string;
+  boxes: BoxConfig[];
+  selectedBoxId: string;
+}
+
+
+
 function Box({ position, color, speed, size, rotationAxis, isSelected, onSelect }) {
   // This reference gives us direct access to the THREE.Mesh object
   const ref = useRef()
@@ -42,12 +51,15 @@ function Box({ position, color, speed, size, rotationAxis, isSelected, onSelect 
 }
 
 export default function RotatingBoxes() {
+  console.log('checking for Local storage:', localStorage.getItem('animationState'));
+
   const [boxes, setBoxes] = useState<BoxConfig[]>([
     { id: 'box1', color: '#00ff00', speed: 1, size: 1, rotationAxis: 'x', position: [-2, 0, 0], isSelected: false },
     { id: 'box2', color: '#00ffff', speed: 0.5, size: 1.2, rotationAxis: 'y', position: [1.2, 0, 0], isSelected: false },
   ]);
   const [selectedBox, setSelectedBox] = useState('box1');
-  const [backgroundColor, setBackgroundColor] = useState('#87CEEB'); // Sky blue default
+  const [backgroundColor, setBackgroundColor] = useState('#FFB3E3'); // Sky blue default
+  const [savedState, setSavedState] = useState<AnimationState | null>(null);
 
   const handleBoxSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedBox(event.target.value);
@@ -107,8 +119,56 @@ export default function RotatingBoxes() {
     setBackgroundColor(event.target.value);
   };
 
+  const handleSubmit = () => {
+    const state = saveAnimationState()
+    localStorage.setItem('animationState', JSON.stringify(state));
+    setSavedState(state);
+    console.log('checking for animation state local:', state);
+    console.log('checking for animation state in savedState:', savedState);
+    console.log('Local storage:', localStorage.getItem('animationState'));
+  };
+
+  // Helper functions to save and load state
+  const saveAnimationState = (): AnimationState => {
+    // Get current state from your component
+    const state: AnimationState = {
+      backgroundColor: backgroundColor,
+      boxes: boxes.map(box => ({
+        id: box.id,
+        color: box.color,
+        speed: box.speed,
+        size: box.size,
+        rotationAxis: box.rotationAxis,
+        position: box.position,
+        isSelected: box.isSelected
+      })),
+      selectedBoxId: selectedBox
+    };
+    return state;
+  };
+
+  // Function to load saved state
+  const handleLoadAnimationState = (savedState: AnimationState) => {
+    if (savedState) {
+      setBackgroundColor(savedState.backgroundColor);
+      setBoxes(savedState.boxes);
+      setSelectedBox(savedState.selectedBoxId);
+    } else {
+      console.error('No saved state found');
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-rose-50">
+      <div className='flex flex-row justify-between'>
+        <h1 className='text-2xl font-mono'>rotating boxes</h1>
+        <button
+          className='text-sm font-mono'
+          onClick={() => localStorage.getItem('animationState') && handleLoadAnimationState(JSON.parse(localStorage.getItem('animationState') || '{}'))}
+        >
+          load saved animation
+        </button>
+      </div>
       <div className='rotating-box border-2 h-3/6'>
         <Canvas>
           <color attach="background" args={[backgroundColor]} />
@@ -138,7 +198,7 @@ export default function RotatingBoxes() {
           />
         </div>
         <div className='addBox mb-4'>
-          <button id="addBox" className='w-full p-2 border rounded text-sm font-mono bg-[#ACE1AF] hover:bg-green-300 transition-colors duration-200 shadow-sm' onClick={handleAddBox}>Add Another Box</button>
+          <button id="addBox" className='w-full p-2 border rounded text-sm font-mono bg-[#ACE1AF] hover:bg-green-300 transition-colors duration-200 shadow-sm' onClick={handleAddBox}>add another box</button>
         </div>
         <div className='mb-4'>
           <label htmlFor="boxSelect" className='text-sm font-mono block mb-2'>Select Box:</label>
@@ -181,12 +241,17 @@ export default function RotatingBoxes() {
         </div>
         <div className='mb-4'>
           <label htmlFor="flipAxis" className='text-sm font-mono block mb-2'>Axis:</label>
-          <button id="flipAxis" className='w-full p-2 border rounded text-sm font-mono bg-blue-100 hover:bg-blue-200 transition-colors duration-200 shadow-sm' onClick={handleFlipAxis}>Flip</button>
+          <button id="flipAxis" className='w-full p-2 border rounded text-sm font-mono bg-blue-100 hover:bg-blue-200 transition-colors duration-200 shadow-sm' onClick={handleFlipAxis}>flip</button>
         </div>
         <div>
-          <button className="w-full p-2 mt-4 bg-rose-100 text-sm font-mono rounded-md hover:bg-pink-400 hover:border-green-300 border-2 transition duration-300 ease-in-out">
-            Submit
+          <button
+            className="w-full p-2 mt-4 bg-rose-100 text-sm font-mono rounded-md hover:bg-pink-400 hover:border-green-300 border-2 transition duration-300 ease-in-out"
+            onClick={handleSubmit}>
+            save my animation
           </button>
+        </div>
+        <div>
+          {savedState ? JSON.stringify(savedState, null, 2) : null}
         </div>
       </div>
     </div>
