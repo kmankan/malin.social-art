@@ -18,7 +18,6 @@ function Box({ position, color, speed, size, rotationAxis, isSelected, onSelect 
   const ref = useRef()
   // Hold state for hovered and clicked events
   const [hovered, hover] = useState(false)
-  const [clicked, click] = useState(false)
   // Subscribe this component to the render-loop, rotate the mesh every frame
   useFrame((state, delta) => {
     if (ref.current) {
@@ -30,9 +29,8 @@ function Box({ position, color, speed, size, rotationAxis, isSelected, onSelect 
     <mesh
       position={position}
       ref={ref}
-      scale={clicked ? size * 1.5 : size}
+      scale={isSelected ? size * 1.5 : size}
       onClick={(event: ThreeEvent<MouseEvent>) => {
-        click(!clicked);
         onSelect(event);
       }}
       onPointerOver={(event) => (event.stopPropagation(), hover(true))}
@@ -49,6 +47,7 @@ export default function RotatingBoxes() {
     { id: 'box2', color: '#00ffff', speed: 0.5, size: 1.2, rotationAxis: 'y', position: [1.2, 0, 0], isSelected: false },
   ]);
   const [selectedBox, setSelectedBox] = useState('box1');
+  const [backgroundColor, setBackgroundColor] = useState('#87CEEB'); // Sky blue default
 
   const handleBoxSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedBox(event.target.value);
@@ -89,7 +88,7 @@ export default function RotatingBoxes() {
       speed: Math.random() * 2 + 0.5,
       size: Math.random() * 0.5 + 0.8,
       rotationAxis: Math.random() > 0.5 ? 'x' : 'y',
-      position: [Math.random() * 4 - 2, Math.random() * 4 - 2, Math.random() * 4 - 2],
+      position: [Math.random() * 6 - 3, Math.random() * 6 - 3, Math.random() * 6 - 3],
       isSelected: false,
     };
     setBoxes(prevBoxes => [...prevBoxes, newBox]);
@@ -104,10 +103,15 @@ export default function RotatingBoxes() {
     })));
   };
 
+  const handleBackgroundColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setBackgroundColor(event.target.value);
+  };
+
   return (
-    <div className="flex flex-col h-screen">
-      <div className='rotating-box flex-grow border-2'>
+    <div className="flex flex-col h-screen bg-rose-50">
+      <div className='rotating-box border-2 h-3/6'>
         <Canvas>
+          <color attach="background" args={[backgroundColor]} />
           <ambientLight intensity={Math.PI / 3} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} decay={0} intensity={Math.PI} />
           <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
@@ -123,41 +127,37 @@ export default function RotatingBoxes() {
         </Canvas>
       </div>
       <div className='userConfig flex-col items-center border-2 p-4'>
+        <div className='mb-4'>
+          <label htmlFor="backgroundColorSelect" className='text-sm font-mono block mb-2'>Background Color:</label>
+          <input
+            type="color"
+            id="backgroundColorSelect"
+            className="w-full h-10 rounded cursor-pointer"
+            onChange={handleBackgroundColorChange}
+            value={backgroundColor}
+          />
+        </div>
         <div className='addBox mb-4'>
-          <label htmlFor="addBox" className='text-sm font-mono block mb-2'>Add Box:</label>
-          <button id="addBox" className='w-full p-2 border rounded' onClick={handleAddBox}>Add Box</button>
+          <button id="addBox" className='w-full p-2 border rounded text-sm font-mono bg-[#ACE1AF] hover:bg-green-300 transition-colors duration-200 shadow-sm' onClick={handleAddBox}>Add Another Box</button>
         </div>
         <div className='mb-4'>
           <label htmlFor="boxSelect" className='text-sm font-mono block mb-2'>Select Box:</label>
-          <select id="boxSelect" className='w-full p-2 border rounded' onChange={handleBoxSelect} value={selectedBox}>
+          <select id="boxSelect" className='w-full p-2 border rounded text-sm font-mono' onChange={handleBoxSelect} value={selectedBox}>
             {boxes.map(box => (
               <option key={box.id} value={box.id}>{box.id}</option>
             ))}
           </select>
         </div>
         <div className='mb-4'>
-          <label htmlFor="colorSelect" className='text-sm font-mono block mb-2'>Color:</label>
+          <label htmlFor="boxColorSelect" className='text-sm font-mono block mb-2'>Color:</label>
           <div className="relative w-full h-10 rounded overflow-hidden">
             <input
               type="color"
-              id="colorPicker"
-              className="absolute w-full h-full opacity-0 cursor-pointer"
+              id="boxColorPicker"
+              className="w-full h-10 rounded cursor-pointer"
               onChange={handleColorSelect}
               value={selectedBox === 'box1' ? boxes[0].color : boxes[1].color}
             />
-            <div
-              className="w-full h-full"
-              style={{
-                background: `linear-gradient(to right, 
-                  #FF0000, /* Red */
-                  #FF7F00, /* Orange */
-                  #FFFF00, /* Yellow */
-                  #00FF00, /* Green */
-                  #0000FF, /* Blue */
-                  #8B00FF  /* Violet */
-                )`,
-              }}
-            ></div>
           </div>
         </div>
         <div className='mb-4'>
@@ -168,14 +168,25 @@ export default function RotatingBoxes() {
             min="0"
             max="10"
             step="0.2"
-            className='w-full'
-            onChange={handleSpeedChange}
+            className="w-full appearance-none bg-gray-200 h-2 rounded-full"
+            style={{
+              background: `linear-gradient(to right, #93c5fd 0%, #93c5fd ${(boxes.find(box => box.id === selectedBox)?.speed || 0) * 10}%, #e5e7eb ${(boxes.find(box => box.id === selectedBox)?.speed || 0) * 10}%, #e5e7eb 100%)`
+            }}
+            onChange={(e) => {
+              handleSpeedChange(e);
+              e.target.style.background = `linear-gradient(to right, #93c5fd 0%, #93c5fd ${e.target.value * 10}%, #e5e7eb ${e.target.value * 10}%, #e5e7eb 100%)`;
+            }}
             value={boxes.find(box => box.id === selectedBox)?.speed || 0}
           />
         </div>
-        <div>
+        <div className='mb-4'>
           <label htmlFor="flipAxis" className='text-sm font-mono block mb-2'>Axis:</label>
-          <button id="flipAxis" className='w-full p-2 border rounded' onClick={handleFlipAxis}>Flip</button>
+          <button id="flipAxis" className='w-full p-2 border rounded text-sm font-mono bg-blue-100 hover:bg-blue-200 transition-colors duration-200 shadow-sm' onClick={handleFlipAxis}>Flip</button>
+        </div>
+        <div>
+          <button className="w-full p-2 mt-4 bg-rose-100 text-sm font-mono rounded-md hover:bg-pink-400 hover:border-green-300 border-2 transition duration-300 ease-in-out">
+            Submit
+          </button>
         </div>
       </div>
     </div>
