@@ -1,8 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Aim: Build a social media platform that allows users to create 3d art and share it on their feed. other users can
+// favourite other artworks on their feed and see how many likes an artwork has. each artwork should be attributable to a author.
 
 generator client {
   provider = "prisma-client-js"
@@ -11,4 +8,42 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Artwork {
+  id            String      @id @default(cuid())
+  title         String
+  description   String?
+  author        User        @relation(fields: [authorId], references: [id])
+  authorId      String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  likes         Int
+  configuration Json
+  favourite     Favourite[]
+}
+
+model User {
+  id         String      @id @default(cuid())
+  username   String      @unique
+  email      String      @unique
+  name       String
+  bio        String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  favourites Favourite[]
+  artworks   Artwork[]
+
+  @@index([username])
+}
+
+model Favourite {
+  id        String   @id @default(cuid())
+  artwork   Artwork  @relation(fields: [artworkId], references: [id])
+  artworkId String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@unique([artworkId, userId])
 }
