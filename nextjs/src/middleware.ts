@@ -8,8 +8,8 @@ export async function middleware(request: NextRequest) {
     const corsResponse = await corsMiddleware(request)
     if (!corsResponse.ok) return corsResponse
     
-    const authResponse = await authMiddleware(request)
-    if (!authResponse.ok) return authResponse
+    // const authResponse = await authMiddleware(request)
+    // if (!authResponse.ok) return authResponse
     
     return NextResponse.next()
     

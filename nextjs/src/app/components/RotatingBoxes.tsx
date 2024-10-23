@@ -2,24 +2,9 @@
 import { useRef, useState, useEffect } from 'react'
 import { Canvas, useFrame, ThreeEvent } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-
-interface BoxConfig {
-  id: string;
-  color: string;
-  speed: number;
-  size: number;
-  rotationAxis: 'x' | 'y';
-  position: [number, number, number];
-  isSelected: boolean;
-}
-
-// Types for saving animation state
-interface AnimationState {
-  backgroundColor: string;
-  boxes: BoxConfig[];
-  selectedBoxId: string;
-}
-
+import { createArtwork } from '@/lib/api/createArtwork';
+// import types
+import { AnimationState, BoxConfig, CreateArtworkData } from '@/types/index';
 
 
 function Box({ position, color, speed, size, rotationAxis, isSelected, onSelect }) {
@@ -51,7 +36,7 @@ function Box({ position, color, speed, size, rotationAxis, isSelected, onSelect 
 }
 
 export default function RotatingBoxes() {
-  console.log('checking for Local storage:', localStorage.getItem('animationState'));
+  //console.log('checking for Local storage:', localStorage.getItem('animationState'));
 
   const [boxes, setBoxes] = useState<BoxConfig[]>([
     { id: 'box1', color: '#00ff00', speed: 1, size: 1, rotationAxis: 'x', position: [-2, 0, 0], isSelected: false },
@@ -119,13 +104,28 @@ export default function RotatingBoxes() {
     setBackgroundColor(event.target.value);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const state = saveAnimationState()
-    localStorage.setItem('animationState', JSON.stringify(state));
-    setSavedState(state);
-    console.log('checking for animation state local:', state);
-    console.log('checking for animation state in savedState:', savedState);
-    console.log('Local storage:', localStorage.getItem('animationState'));
+    //localStorage.setItem('animationState', JSON.stringify(state));
+    const artworkData: CreateArtworkData = {
+      title: "Rotating Boxes",
+      authorId: "cm2l7szil00005z1olbmvf1rl", // You might want to replace this with actual user ID
+      state: state
+    };
+    try {
+      const createdArtwork = await createArtwork(artworkData);
+      if (createdArtwork) {
+        console.log('Artwork created successfully:', createdArtwork);
+        setSavedState(state);
+      } else {
+        console.error('Failed to create artwork');
+      }
+    } catch (error) {
+      console.error('Error creating artwork:', error);
+    }
+
+    console.log('Animation state saved locally:', state);
+    //console.log('Local storage:', localStorage.getItem('animationState'));
   };
 
   // Helper functions to save and load state
