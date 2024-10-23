@@ -3,14 +3,13 @@ import { prisma } from "@/lib/db"
 
 // This route handles POST requests to /artworks/create
 
-// This handles POST requests to /api/users
 export async function POST(request: Request) {
   try {
     // Parse the request body
-    const { title, description, authorId, configuration } = await request.json();
+    const { title, description, authorId, state } = await request.json();
 
     // Validate input
-    if (!title || !authorId || !configuration) {
+    if (!title || !authorId || !state) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -20,7 +19,7 @@ export async function POST(request: Request) {
         title,
         description,
         authorId, //adds new artwork to the Artwork table and links it with a user in the User table
-        configuration, // need to perform type checking on configuration
+        state, // need to perform type checking on configuration
         likes: 0, // Initialize likes to 0
       },
     });
@@ -31,3 +30,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
