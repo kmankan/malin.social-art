@@ -25,7 +25,7 @@ model User {
   clerk_id   String      @unique // Add this new field
   username   String?     @unique
   email      String      @unique
-  name       String
+  name       String?
   bio        String?
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt

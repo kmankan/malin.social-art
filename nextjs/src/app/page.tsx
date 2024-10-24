@@ -5,11 +5,11 @@ import { auth, currentUser } from '@clerk/nextjs/server'
 
 export default async function Page() {
 
-  const obj = await auth()
-  console.log('test', obj)
+  // const obj = await auth()
+  // console.log('test', obj)
 
-  const user = await currentUser()
-  console.log('did we get the user object?', user)
+  // const user = await currentUser()
+  // console.log('did we get the user object?', user)
 
   // make a GET request to the backend, triggering the middleware
 

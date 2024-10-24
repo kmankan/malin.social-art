@@ -9,13 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.0.0",
+    "@clerk/clerk-js": "^5.29.0",
+    "@clerk/clerk-sdk-node": "^5.0.54",
+    "@clerk/nextjs": "^6.0.1",
     "@prisma/client": "^5.21.1",
     "@react-three/drei": "9.114.6",
     "@react-three/fiber": "8.17.10",
     "@react-three/postprocessing": "2.7.0",
     "@react-three/rapier": "0.8.2",
     "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
     "next": "14.2.15",
     "react": "^18",
     "react-dom": "^18",
