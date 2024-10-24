@@ -3,7 +3,6 @@ import { clerkClient } from "@clerk/nextjs/server";
 
 export const syncUserWithDatabase = async (userId: string) => {
   const client = await clerkClient();
-  console.log(client)
   const user = await client.users?.getUser(userId);
 
   // check if the clerk_id exits in the database
@@ -20,8 +19,8 @@ export const syncUserWithDatabase = async (userId: string) => {
         username: user.username
       }
     });
-    console.log(userId, "added to database")
+    console.log("success:",userId, "added to database")
   } else {
-    console.log("user already in database")
+    console.log("notice: user already in database")
   }
 }

@@ -1,29 +1,32 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { clerkMiddleware, createRouteMatcher, clerkClient } from '@clerk/nextjs/server'
-import { syncUserWithDatabase } from './app/api/ sync-user/sync'
+import { syncUserWithDatabase } from './app/api/sync/sync'
 
 // define protected routes - restrict these routes to signed in users only
 const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)'])
 
 // We use clerkMiddleware as the default export, passing it an async function.
 export default clerkMiddleware(async (auth, request: NextRequest) => {
-  if (!isPublicRoute(request)) {
-    await auth.protect()
-  }
-
+  // if (!isPublicRoute(request)) {
+  //   await auth.protect()
+  // }
+  console.log("middleware is running")
   // get the clerk_id from the auth() function
   const { userId } = await auth()
 
   if (userId) {
-    // Call the API route instead of directly calling the function
-    fetch('/api/sync-user', {
+    // Use an absolute URL for the API route
+    const apiUrl = `${request.nextUrl.origin}/api/sync`;
+    fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId })
     }).catch(error => console.error('Error syncing user:', error));
     // We use .catch() here to handle any network errors, but we don't await the response
     // to avoid blocking the middleware
+  } else {
+    console.error('Error: userId not found');
   }
 
   // next() method creates a response object allowing requests to continue to the next middleware 
