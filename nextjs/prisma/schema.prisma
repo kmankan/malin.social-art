@@ -42,7 +42,7 @@ model Favourite {
   userId    String
   createdAt DateTime @default(now())
   artwork   Artwork  @relation(fields: [artworkId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [clerk_id])
 
   @@unique([artworkId, userId])
 }
