@@ -1,45 +1,37 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { auth, clerkMiddleware, createRouteMatcher, clerkClient } from '@clerk/nextjs/server'
-import { prisma } from '@/lib/db/index'
+import { clerkMiddleware, createRouteMatcher, clerkClient } from '@clerk/nextjs/server'
+import { syncUserWithDatabase } from './app/api/sync/sync'
 
 // define protected routes - restrict these routes to signed in users only
 const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)'])
 
-
 // We use clerkMiddleware as the default export, passing it an async function.
-export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
-    await auth.protect()
-  }
-
+export default clerkMiddleware(async (auth, request: NextRequest) => {
+  // if (!isPublicRoute(request)) {
+  //   await auth.protect()
+  // }
+  console.log("middleware is running")
   // get the clerk_id from the auth() function
   const { userId } = await auth()
 
   if (userId) {
-    const client = await clerkClient();
-    console.log(client)
-    const user = await client.users?.getUser(userId);
-    
-    // check if the clerk_id exits in the database
-    const clerkUser = await prisma.user.findUnique({
-      where: { clerk_id: userId }
-    });
-    // if they don't add them to the database
-    if (!clerkUser) {
-      await prisma.user.create({
-        data: {
-          clerk_id: userId,
-          email: user.emailAddresses[0].emailAddress,
-          name: user.firstName,
-          username: user.username
-        }
-      });
-      console.log(userId, "added to database")
-    } else {
-      console.log("user in database")
-    }
+    // Use an absolute URL for the API route
+    const apiUrl = `${request.nextUrl.origin}/api/sync`;
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    }).catch(error => console.error('Error syncing user:', error));
+    // We use .catch() here to handle any network errors, but we don't await the response
+    // to avoid blocking the middleware
+  } else {
+    console.error('Error: userId not found');
   }
+
+  // next() method creates a response object allowing requests to continue to the next middleware 
+  // i.e. continue processing the next middleware normally after this
+  return NextResponse.next();
 })
 
 // This configures which routes the middleware runs on
