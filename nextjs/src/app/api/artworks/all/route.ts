@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from "@/lib/db"
+import { prisma } from "@/lib/db/index"
 
 // This handles GET requests to /api/artworks/all
 export async function GET(request: Request) {

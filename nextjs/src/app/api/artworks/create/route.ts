@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from "@/lib/db"
+import { prisma } from "@/lib/db/index"
 
 // This route handles POST requests to /artworks/create
 
