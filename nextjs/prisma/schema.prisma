@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Artwork {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  authorId    String // this is store the clerk_id
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  likes       Int
+  state       Json
+  author      User        @relation(fields: [authorId], references: [clerk_id])
+  favourite   Favourite[]
+}
+
+model User {
+  id         String      @id @default(cuid())
+  clerk_id   String      @unique // Add this new field
+  username   String?     @unique
+  email      String      @unique
+  name       String
+  bio        String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  artworks   Artwork[]
+  favourites Favourite[]
+
+  @@index([username])
+  @@index([clerk_id]) // Add index for clerk_id
+}
+
+model Favourite {
+  id        String   @id @default(cuid())
+  artworkId String
+  userId    String
+  createdAt DateTime @default(now())
+  artwork   Artwork  @relation(fields: [artworkId], references: [id])
+  user      User     @relation(fields: [userId], references: [clerk_id])
+
+  @@unique([artworkId, userId])
+}
