@@ -1,5 +1,5 @@
-import InteractiveAtom from './components/Atom';
-import RotatingBoxes from './components/RotatingBoxes';
+import InteractiveAtom from './components/ui/Atom';
+import RotatingBoxes from './components/ui/RotatingBoxes';
 
 export default function Home() {
   return (
