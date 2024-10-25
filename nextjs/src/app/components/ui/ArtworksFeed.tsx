@@ -97,7 +97,7 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
                     <div className="mt-4 flex items-center">
                       <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden" >
                         <img
-                          src={user?.imageUrl}
+                          src={canvas.author.imageUrl}
                           alt={`${canvas.author.name}'s profile`}
                           className="h-full w-full object-cover"
                         />
