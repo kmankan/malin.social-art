@@ -1,3 +1,5 @@
+import { Artwork, User } from '@prisma/client'
+
 export type CreateArtworkData = {
   title: string;
   description?: string;
@@ -31,3 +33,5 @@ export type RotatingBoxesCanvasProps = {
 export type BoxesCanvas = {
   state: AnimationState;
 }
+
+export type ArtworkMetadata = (Artwork & { author: User, state: AnimationState })[]

@@ -15,7 +15,7 @@ export function RotatingBoxesCanvas({
   const [backgroundColor, setBackgroundColor] = useState(initialBackgroundColor); // Sky blue default
 
   return (
-    <div className='rotating-box border-2 h-3/6'>
+    <div className='rotating-box border-2 h-full'>
       <Canvas>
         <color attach="background" args={[backgroundColor]} />
         <ambientLight intensity={Math.PI / 3} />
