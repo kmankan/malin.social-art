@@ -1,16 +1,32 @@
 'use client';
 // modules
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RotatingBoxesCanvas } from './RotatingBoxesCanvas';
-// import { Heart } from 'lucide-react';
 import { HeartStraight } from 'phosphor-react'
-
-//types
+// types
 import { ArtworkWithAuthor } from '@/types';
 
 export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWithAuthor[] }) => {
   // store in state an array of objects structured like ArtworkWithAuthor
   const [artworks, setArtworks] = useState<ArtworkWithAuthor[]>(initialArtworks);
+  // store in state all of the artworks the user has already liked
+  const [likedArtworks, setLikedArtworks] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const fetchLikedArtworks = async () => {
+      try {
+        const response = await fetch('/api/artworks/liked');
+        if (response.ok) {
+          const likedArtworkIds = await response.json();
+          setLikedArtworks(new Set(likedArtworkIds));
+        }
+      } catch (error) {
+        console.error('Error fetching liked artworks:', error);
+      }
+    };
+
+    fetchLikedArtworks();
+  }, []);
 
   const handleLike = async (artworkId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -78,24 +94,16 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
                 <div
                   className='flex items-center mt-4'
                   id='likes'>
-                  <div>{artworks.find((artwork) => artwork.id === canvas.id)?.likes}</div>
+                  <div id='numberOfLikesInRealtime'>
+                    {artworks.find((artwork) => artwork.id === canvas.id)?.likes}
+                  </div>
                   <div
+                    id='likeButton'
                     className='ml-1 cursor-pointer transition-colors hover:text-red-500'
-                    onClick={async (e) => {
-                      e.stopPropagation(); // Prevent triggering parent click
-                      try {
-                        const response = await fetch(`/api/artworks/${canvas.id}/like`, {
-                          method: 'POST',
-                        });
-                        if (!response.ok) {
-                          throw new Error('Failed to like artwork');
-                        }
-                        // Could add optimistic update here if we had state management
-                      } catch (error) {
-                        console.error('Error liking artwork:', error);
-                      }
-                    }}
-                  ><HeartStraight size={24} /></div>
+                    onClick={async (e) => handleLike(canvas.id, e)}
+                  >
+                    <HeartStraight size={24} />
+                  </div>
                 </div>
               </div>
             </div>
