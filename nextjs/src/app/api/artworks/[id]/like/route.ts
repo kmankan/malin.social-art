@@ -32,7 +32,7 @@ export async function POST(
 
     if (existingFavorite) {
       // Unlike: Remove favorite and decrement likes
-      const [favourite, updatedArtwork] = await prisma.$transaction([
+      const [, updatedArtwork] = await prisma.$transaction([
         prisma.favourite.delete({
           where: {
             id: existingFavorite.id // Use the id field from schema

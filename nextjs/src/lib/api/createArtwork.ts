@@ -1,6 +1,5 @@
-import { prisma } from '@/lib/db/index';
 //import types
-import { AnimationState, BoxConfig, CreateArtworkData } from '@/types/index';
+import {CreateArtworkData } from '@/types/index';
 import { Artwork } from "@prisma/client"
 
 // this function will accept state

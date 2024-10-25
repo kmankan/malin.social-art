@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function corsMiddleware(request: NextRequest): NextResponse {
+export function corsMiddleware(): NextResponse {
   const response = NextResponse.next()
   // We want to modify the response before moving it forward
   // Create response, modify it, then return it

@@ -2,7 +2,13 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function createNewUser(username: string, email: string, name: string, bio: string) {
+async function createNewUser(
+  username: string, 
+  email: string, 
+  name: string, 
+  bio: string,
+  clerk_id: string  // Add this parameter
+) {
   try {
     const newUser = await prisma.user.create({
       data: {
@@ -10,6 +16,7 @@ async function createNewUser(username: string, email: string, name: string, bio:
         email,
         name,
         bio,
+        clerk_id,  // Add this field
       },
     });
 
