@@ -8,8 +8,8 @@ import { prisma } from "@/lib/db";
 // If invalid or missing, userId will be null and you can return an error
 
 // A GET request that returns the users profile and artworks
-export async function GET(request: NextRequest) {
-  const { userId } = auth();
+export async function GET() {
+  const { userId } = await auth();
 
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const newUser = await createNewUser(username, email, name, bio);
+    const newUser = await createNewUser(username, email, name, bio, userId);
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
     console.error('Error creating new user:', error);

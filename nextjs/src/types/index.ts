@@ -1,4 +1,3 @@
-import { Artwork, User, Favourite } from '@prisma/client'
 import { Prisma } from '@prisma/client'
 
 export type CreateArtworkData = {
@@ -60,7 +59,6 @@ export type ArtworkWithAuthor = {
 
 // Different includes give different types
 // You can use this pattern to see exactly what type Prisma is inferring from your schema
-export type ArtworkBasic = Prisma.ArtworkGetPayload<{}>  // No includes
 export type ArtworkBelongingToAuthor = Prisma.ArtworkGetPayload<{ include: { author: true } }>
 export type ArtworkWithFavorites = Prisma.ArtworkGetPayload<{ include: { favourite: true } }>
 export type ArtworkWithAuthorAndFavoritesAndUsers = Prisma.ArtworkGetPayload<{

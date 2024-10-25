@@ -1,5 +1,3 @@
-import { prisma } from '@/lib/db/index'
-import { ArtworkWithAuthor } from '@/types';
 import ArtworkFeed from './components/ui/ArtworksFeed'
 import { getEnrichedArtworks } from '@/lib/utils/artworks';
 

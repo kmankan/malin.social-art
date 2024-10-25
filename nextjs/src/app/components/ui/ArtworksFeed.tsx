@@ -2,8 +2,8 @@
 // modules
 import React, { useState, useEffect } from 'react';
 import { RotatingBoxesCanvas } from './RotatingBoxesCanvas';
-import { HeartStraight, User } from 'phosphor-react'
-import { useUser } from '@clerk/clerk-react';
+import { HeartStraight } from 'phosphor-react'
+import Image from 'next/image';
 // types
 import { ArtworkWithAuthor } from '@/types';
 
@@ -12,7 +12,6 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
   const [artworks, setArtworks] = useState<ArtworkWithAuthor[]>(initialArtworks);
   // store in state all of the artworks the user has already liked
   const [likedArtworks, setLikedArtworks] = useState<Set<string>>(new Set());
-  const { user } = useUser();
 
   // when the page loads, get all of the artworks a user has liked and store in state
   useEffect(() => {
@@ -96,9 +95,11 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
                   {canvas.author && (
                     <div className="mt-4 flex items-center">
                       <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden" >
-                        <img
-                          src={canvas.author.imageUrl}
-                          alt={`${canvas.author.name}'s profile`}
+                        <Image
+                          src={canvas.author.imageUrl || '/default-avatar.svg'} // Provide a fallback image
+                          alt={`${canvas.author?.name || 'User'}'s profile`}
+                          width={40}
+                          height={40}
                           className="h-full w-full object-cover"
                         />
                       </div>

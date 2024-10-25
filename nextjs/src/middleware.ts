@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { clerkMiddleware, createRouteMatcher, clerkClient } from '@clerk/nextjs/server'
-import { syncUserWithDatabase } from './app/api/sync/sync'
+import { clerkMiddleware } from '@clerk/nextjs/server'
 
 // define protected routes - restrict these routes to signed in users only
-const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)', '/api/sync'])
+//const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)', '/api/sync'])
 
 // We use clerkMiddleware as the default export, passing it an async function.
 export default clerkMiddleware(async (auth, request: NextRequest) => {

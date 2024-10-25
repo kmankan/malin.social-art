@@ -1,16 +1,27 @@
 'use client';
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState } from 'react'
 import { Canvas, useFrame, ThreeEvent } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { createArtwork } from '@/lib/api/createArtwork';
 import { useUser } from '@clerk/clerk-react';
 // import types
 import { AnimationState, BoxConfig, CreateArtworkData } from '@/types/index';
+import { Mesh } from 'three';  // Add this import at the top
 
 
-export function Box({ position, color, speed, size, rotationAxis, isSelected, onSelect }) {
+export function Box({
+  position,
+  color,
+  speed,
+  size,
+  rotationAxis,
+  isSelected,
+  onSelect
+}: BoxConfig & {
+  onSelect: (event: ThreeEvent<MouseEvent>) => void;
+}) {
   // This reference gives us direct access to the THREE.Mesh object
-  const ref = useRef()
+  const ref = useRef<Mesh>(null);
   // Hold state for hovered and clicked events
   const [hovered, hover] = useState(false)
   // Subscribe this component to the render-loop, rotate the mesh every frame
@@ -28,8 +39,8 @@ export function Box({ position, color, speed, size, rotationAxis, isSelected, on
       onClick={(event: ThreeEvent<MouseEvent>) => {
         onSelect(event);
       }}
-      onPointerOver={(event) => (event.stopPropagation(), hover(true))}
-      onPointerOut={(event) => hover(false)}>
+      onPointerOver={() => hover(true)}
+      onPointerOut={() => hover(false)}>
       <boxGeometry args={[1, 1, 1]} />
       <meshStandardMaterial color={hovered ? 'hotpink' : color} />
     </mesh>
@@ -72,12 +83,12 @@ export default function RotatingBoxes() {
     ));
   };
 
-  const handleSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newSize = parseFloat(event.target.value);
-    setBoxes(prevBoxes => prevBoxes.map(box =>
-      box.id === selectedBox ? { ...box, size: newSize } : box
-    ));
-  };
+  // const handleSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const newSize = parseFloat(event.target.value);
+  //   setBoxes(prevBoxes => prevBoxes.map(box =>
+  //     box.id === selectedBox ? { ...box, size: newSize } : box
+  //   ));
+  // };
 
   const handleAddBox = () => {
     const newBoxId = `box${boxes.length + 1}`;
@@ -237,7 +248,8 @@ export default function RotatingBoxes() {
             }}
             onChange={(e) => {
               handleSpeedChange(e);
-              e.target.style.background = `linear-gradient(to right, #93c5fd 0%, #93c5fd ${e.target.value * 10}%, #e5e7eb ${e.target.value * 10}%, #e5e7eb 100%)`;
+              const value = Number(e.target.value);
+              e.target.style.background = `linear-gradient(to right, #93c5fd 0%, #93c5fd ${value * 10}%, #e5e7eb ${value * 10}%, #e5e7eb 100%)`;
             }}
             value={boxes.find(box => box.id === selectedBox)?.speed || 0}
           />

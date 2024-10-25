@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "malin-social-art-platform",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,18 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@clerk/clerk-js": "^5.29.0",
     "@clerk/clerk-react": "^5.13.1",
-    "@clerk/clerk-sdk-node": "^5.0.54",
     "@clerk/nextjs": "^6.0.1",
     "@prisma/client": "^5.21.1",
     "@react-three/drei": "9.114.6",
     "@react-three/fiber": "8.17.10",
     "@react-three/postprocessing": "2.7.0",
     "@react-three/rapier": "0.8.2",
-    "axios": "^1.7.7",
-    "dotenv": "^16.4.5",
-    "lucide-react": "^0.453.0",
     "next": "14.2.15",
     "phosphor-react": "^1.4.1",
     "react": "^18",
@@ -28,7 +23,6 @@
     "three": "0.159.0"
   },
   "devDependencies": {
-    "@shadcn/ui": "^0.0.4",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -38,6 +32,7 @@
     "postcss": "^8",
     "prisma": "^5.21.1",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "dotenv": "^16.4.5"
   }
 }

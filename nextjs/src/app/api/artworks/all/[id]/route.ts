@@ -15,7 +15,7 @@ export async function GET(
         id: true,
         title: true,
         description: true,
-        configuration: true,
+        state: true,
         likes: true,
         createdAt: true,
         author: {
