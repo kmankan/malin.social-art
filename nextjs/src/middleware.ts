@@ -21,7 +21,8 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
   // Create the response object early so we can modify cookies
   const response = NextResponse.next();
 
-  // Create a user-specific cookie name
+  // Create a user-specific cookie name - this ensures that if multiple users login
+  // on the same device they won't share the same cookie
   const cookieName = `userValidatedInDatabase_${userId}`;
   const existingValidation = request.cookies.get(cookieName);
   console.log('cookie', existingValidation)

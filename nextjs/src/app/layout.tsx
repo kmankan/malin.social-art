@@ -24,20 +24,26 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <ClerkProvider>
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <div className="header p-4 bg-rose-100 flex justify-between items-center">
-            <div className="flex-1">
-              {/* Empty div for balanced spacing */}
-            </div>
-            <h1 className="text-2xl font-mono text-center border-2 flex-1">
-              The Social Art Platform
-            </h1>
-            <div className='clerk border-2 flex-1 flex justify-end'>
-              <SignedOut>
-                <SignInButton />
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
+          <div className="p-4 bg-rose-100 flex justify-center border-2 border-amber-800">
+            <div className='border-2 border-red-500 flex justify-between items-center w-full'>
+              <div className='w-7/12 flex justify-end'>
+                <a href="/" className="text-2xl font-mono text-center border-2">The Social Art Platform</a>
+              </div>
+              <div>
+                <nav className="space-x-4 border-2">
+                  <a href="/" className="text-lg">Feed</a>
+                  <a href="/create" className="text-lg">Create</a>
+                  <a href="/profile" className="text-lg">Profile</a>
+                </nav>
+              </div>
+              <div className='border-2'>
+                <SignedOut>
+                  <SignInButton />
+                </SignedOut>
+                <SignedIn>
+                  <UserButton />
+                </SignedIn>
+              </div>
             </div>
           </div>
           <main>{children}</main>
