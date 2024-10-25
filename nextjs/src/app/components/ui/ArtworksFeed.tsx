@@ -104,7 +104,7 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
                       </div>
                       <div className="ml-3">
                         <p className="text-sm font-medium text-gray-900">
-                          {canvas.author.name} {canvas.author.email}
+                          {canvas.author.name}
                         </p>
                       </div>
                     </div>
