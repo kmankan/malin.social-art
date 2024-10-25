@@ -1,5 +1,5 @@
 // this page will allow the user to create a new artworkimport InteractiveAtom from './components/ui/Atom';
-import RotatingBoxes from '../components/ui/RotatingBoxes';
+import RotatingBoxes from '../components/ui/CreateRotatingBoxes';
 
 export default async function Page() {
 
