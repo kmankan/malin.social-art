@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from 'react'
 import { Canvas, useFrame, ThreeEvent } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { createArtwork } from '@/lib/api/createArtwork';
+import { useUser } from '@clerk/clerk-react';
 // import types
 import { AnimationState, BoxConfig, CreateArtworkData } from '@/types/index';
 
@@ -45,6 +46,7 @@ export default function RotatingBoxes() {
   const [selectedBox, setSelectedBox] = useState('box1');
   const [backgroundColor, setBackgroundColor] = useState('#FFB3E3'); // Sky blue default
   const [savedState, setSavedState] = useState<AnimationState | null>(null);
+  const { user } = useUser();
 
   const handleBoxSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedBox(event.target.value);
@@ -105,11 +107,15 @@ export default function RotatingBoxes() {
   };
 
   const handleSubmit = async () => {
+    if (!user) {
+      console.error('User is not authenticated');
+      return;
+    }
+
     const state = saveAnimationState()
-    //localStorage.setItem('animationState', JSON.stringify(state));
     const artworkData: CreateArtworkData = {
       title: "Rotating Boxes",
-      authorId: "cm2l7szil00005z1olbmvf1rl", // You might want to replace this with actual user ID
+      authorId: user.id ?? "default", // You might want to replace this with actual user ID
       state: state
     };
     try {
@@ -123,9 +129,6 @@ export default function RotatingBoxes() {
     } catch (error) {
       console.error('Error creating artwork:', error);
     }
-
-    console.log('Animation state saved locally:', state);
-    //console.log('Local storage:', localStorage.getItem('animationState'));
   };
 
   // Helper functions to save and load state

@@ -23,11 +23,12 @@ export async function POST(request: Request) {
         likes: 0, // Initialize likes to 0
       },
     });
-
+    
+    console.log('New artwork added to database:', newArtwork, newArtwork.id);
+    
     return NextResponse.json(newArtwork, { status: 201 });
   } catch (error) {
     console.error('Error creating artwork:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-
