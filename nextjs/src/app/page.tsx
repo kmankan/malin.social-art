@@ -4,10 +4,13 @@ import { RotatingBoxesCanvas } from './components/ui/RotatingBoxesCanvas';
 import { AnimationState } from '@/types';
 import ArtworkFeed from './components/ui/ArtworksFeed'
 
+
+
 export default async function Page() {
   const artworks = (await prisma.artwork.findMany({
     include: { author: true }
   })) as (Artwork & { author: User, state: AnimationState })[];
+  console.log(artworks)
 
   return (
     <ArtworkFeed artworks={artworks} />
