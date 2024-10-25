@@ -1,4 +1,5 @@
 import { Artwork, User } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 
 export type CreateArtworkData = {
   title: string;
@@ -34,4 +35,30 @@ export type BoxesCanvas = {
   state: AnimationState;
 }
 
-export type ArtworkMetadata = (Artwork & { author: User, state: AnimationState })[]
+export type ArtworkWithAuthor = {
+  id: string;
+  title: string;
+  description: string | null;
+  authorId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  likes: number;
+  state: AnimationState;
+  author: {
+    id: string;
+    clerk_id: string;
+    username: string | null;
+    email: string;
+    name: string | null;
+    bio: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+}
+
+
+// Different includes give different types
+// You can use this pattern to see exactly what type Prisma is inferring from your schema
+export type ArtworkBasic = Prisma.ArtworkGetPayload<{}>  // No includes
+export type ArtworkBelongingToAuthor = Prisma.ArtworkGetPayload<{ include: { author: true } }>
+export type ArtworkWithFavorites = Prisma.ArtworkGetPayload<{ include: { favourite: true } }>

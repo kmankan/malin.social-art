@@ -1,16 +1,41 @@
 'use client';
 // modules
-import React from 'react';
+import React, { useState } from 'react';
 import { RotatingBoxesCanvas } from './RotatingBoxesCanvas';
-import { Heart } from 'lucide-react';
+// import { Heart } from 'lucide-react';
+import { HeartStraight } from 'phosphor-react'
 
 //types
-import { ArtworkMetadata } from '@/types';
+import { ArtworkWithAuthor } from '@/types';
 
-export const ArtworkFeed = ({ artworks }: { artworks: ArtworkMetadata }) => {
-  const handleArtworkClick = (artworkId: string | number) => {
-    // You can add your desired action here
-    console.log('Artwork clicked:', artworkId);
+export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWithAuthor[] }) => {
+  // store in state an array of objects structured like ArtworkWithAuthor
+  const [artworks, setArtworks] = useState<ArtworkWithAuthor[]>(initialArtworks);
+
+  const handleLike = async (artworkId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      // we're sending the 
+      const response = await fetch(`/api/artworks/${artworkId}/like`, {
+        method: 'POST',
+      });
+      if (response.ok) {
+        const updatedArtworkMetadata = await response.json();
+        // Update the specific artwork's likes in state
+        // map through each artwork until we find the current one, and update that object
+        setArtworks(currentArtworks =>
+          currentArtworks.map(artwork =>
+            artwork.id === artworkId
+              ? { ...artwork, likes: updatedArtworkMetadata.likes }
+              : artwork
+          )
+        );
+      } else {
+        throw new Error('Failed to like artwork');
+      }
+    } catch (error) {
+      console.error('Error liking artwork:', error);
+    }
   };
 
   return (
@@ -22,13 +47,11 @@ export const ArtworkFeed = ({ artworks }: { artworks: ArtworkMetadata }) => {
           {artworks.map((canvas, index) => (
             <div
               key={canvas.id || index}
-              onClick={() => handleArtworkClick(canvas.id)}
               id="eachArtwork"
               className="mb-8 rounded-2xl bg-slate-100 shadow-lg hover:shadow-xl 
-              transition-all duration-300 p-6 border-4 border-orange-700 flex flex-col 
-              justify-between cursor-pointer active:bg-slate-200"
+              transition-all duration-300 p-6 border-4 border-orange-700"
             >
-              <div className="border-2 border-green-500 aspect-[4/3] w-full">
+              <div className="border-2 aspect-[4/3] w-full">
                 <RotatingBoxesCanvas
                   initialBoxes={canvas.state.boxes}
                   initialBackgroundColor={canvas.state.backgroundColor}
@@ -55,7 +78,24 @@ export const ArtworkFeed = ({ artworks }: { artworks: ArtworkMetadata }) => {
                 <div
                   className='flex items-center mt-4'
                   id='likes'>
-                  {canvas.likes}
+                  <div>{artworks.find((artwork) => artwork.id === canvas.id)?.likes}</div>
+                  <div
+                    className='ml-1 cursor-pointer transition-colors hover:text-red-500'
+                    onClick={async (e) => {
+                      e.stopPropagation(); // Prevent triggering parent click
+                      try {
+                        const response = await fetch(`/api/artworks/${canvas.id}/like`, {
+                          method: 'POST',
+                        });
+                        if (!response.ok) {
+                          throw new Error('Failed to like artwork');
+                        }
+                        // Could add optimistic update here if we had state management
+                      } catch (error) {
+                        console.error('Error liking artwork:', error);
+                      }
+                    }}
+                  ><HeartStraight size={24} /></div>
                 </div>
               </div>
             </div>
