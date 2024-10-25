@@ -1,24 +1,36 @@
-// this page will allow the user to view their profile and what they have created
+import { prisma } from '@/lib/db/index'
+import { Artwork, User } from '@prisma/client'
+import { AnimationState } from '@/types';
+import ArtworkFeed from '../components/ui/ArtworksFeed'
+import { currentUser } from '@clerk/nextjs/server'
 
-// User logs in with Clerk
-// Clerk sets secure HTTP-only cookies in their browser
-// When you make a fetch request to your API route, browsers automatically include these cookies
+export default async function Page() {
+  const user = await currentUser();
 
-const fetchProfile = async () => {
-  try {
-    // retrieve the response from the backend and store in variable
-    const response = await fetch('/api/profile');
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch profile');
-    }
-
-    // extract json data from response
-    const profile = await response.json();
-    // Use the profile data...
-
-  } catch (error) {
-    console.error('Error fetching profile:', error);
-    // Handle error appropriately
+  if (!user) {
+    return <div>Please log in to view your profile</div>;
   }
-};
+
+  const artworks = (await prisma.artwork.findMany({
+    where: {
+      authorId: user.id
+    },
+    include: { author: true }
+  })) as (Artwork & { author: User, state: AnimationState })[];
+
+  // Server-side log (will appear in terminal)
+  console.log('Server-side artworks:', artworks);
+
+  return (
+    <div className="w-full">
+      {artworks.length === 0 ? (
+        <div>No artworks found</div>
+      ) : (
+        <>
+          <ArtworkFeed artworks={artworks} />
+          <div>Found {artworks.length} artwork(s)</div>
+        </>
+      )}
+    </div>
+  );
+}

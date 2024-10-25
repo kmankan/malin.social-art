@@ -1,4 +1,5 @@
 import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import Link from 'next/link';
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -25,18 +26,18 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <div className="p-4 bg-rose-100 flex justify-center border-2 border-amber-800">
-            <div className='border-2 border-red-500 flex justify-between items-center w-full'>
+            <div className='flex justify-between items-center w-full'>
               <div className='w-7/12 flex justify-end'>
-                <a href="/" className="text-2xl font-mono text-center border-2">The Social Art Platform</a>
+                <a href="/" className="text-2xl font-mono text-center">The Social Art Platform</a>
               </div>
               <div>
-                <nav className="space-x-4 border-2">
-                  <a href="/" className="text-lg">Feed</a>
-                  <a href="/create" className="text-lg">Create</a>
-                  <a href="/profile" className="text-lg">Profile</a>
+                <nav className="space-x-4">
+                  <Link href="/" className="text-lg">Feed</Link>
+                  <Link href="/create" className="text-lg">Create</Link>
+                  <Link href="/profile" className="text-lg">Profile</Link>
                 </nav>
               </div>
-              <div className='border-2'>
+              <div className=''>
                 <SignedOut>
                   <SignInButton />
                 </SignedOut>

@@ -8,7 +8,7 @@ import { useUser } from '@clerk/clerk-react';
 import { AnimationState, BoxConfig, CreateArtworkData } from '@/types/index';
 
 
-function Box({ position, color, speed, size, rotationAxis, isSelected, onSelect }) {
+export function Box({ position, color, speed, size, rotationAxis, isSelected, onSelect }) {
   // This reference gives us direct access to the THREE.Mesh object
   const ref = useRef()
   // Hold state for hovered and clicked events
