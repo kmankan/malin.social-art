@@ -1,18 +1,10 @@
 import { prisma } from '@/lib/db/index'
-import { Artwork, User } from '@prisma/client'
-import { RotatingBoxesCanvas } from './components/ui/RotatingBoxesCanvas';
-import { AnimationState } from '@/types';
+import { ArtworkWithAuthor } from '@/types';
 import ArtworkFeed from './components/ui/ArtworksFeed'
-
+import { getEnrichedArtworks } from '@/lib/utils/artworks';
 
 
 export default async function Page() {
-  const artworks = (await prisma.artwork.findMany({
-    include: { author: true }
-  })) as (Artwork & { author: User, state: AnimationState })[];
-  console.log(artworks)
-
-  return (
-    <ArtworkFeed artworks={artworks} />
-  );
+  const artworks = await getEnrichedArtworks();
+  return <ArtworkFeed artworks={artworks} />;
 }

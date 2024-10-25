@@ -2,7 +2,8 @@
 // modules
 import React, { useState, useEffect } from 'react';
 import { RotatingBoxesCanvas } from './RotatingBoxesCanvas';
-import { HeartStraight } from 'phosphor-react'
+import { HeartStraight, User } from 'phosphor-react'
+import { useUser } from '@clerk/clerk-react';
 // types
 import { ArtworkWithAuthor } from '@/types';
 
@@ -11,27 +12,27 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
   const [artworks, setArtworks] = useState<ArtworkWithAuthor[]>(initialArtworks);
   // store in state all of the artworks the user has already liked
   const [likedArtworks, setLikedArtworks] = useState<Set<string>>(new Set());
+  const { user } = useUser();
 
+  // when the page loads, get all of the artworks a user has liked and store in state
   useEffect(() => {
-    const fetchLikedArtworks = async () => {
+    const fetchLikeStatuses = async () => {
       try {
         const response = await fetch('/api/artworks/liked');
         if (response.ok) {
-          const likedArtworkIds = await response.json();
-          setLikedArtworks(new Set(likedArtworkIds));
+          const likedArtworkIds: string[] = await response.json();
+          setLikedArtworks(new Set(likedArtworkIds)); // Valid: string[] -> Set<string>
         }
       } catch (error) {
-        console.error('Error fetching liked artworks:', error);
+        console.error('Error fetching like statuses:', error);
       }
     };
-
-    fetchLikedArtworks();
+    fetchLikeStatuses();
   }, []);
 
   const handleLike = async (artworkId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      // we're sending the 
       const response = await fetch(`/api/artworks/${artworkId}/like`, {
         method: 'POST',
       });
@@ -46,8 +47,20 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
               : artwork
           )
         );
-      } else {
-        throw new Error('Failed to like artwork');
+
+        // Toggle based on current state instead
+        // the current state determines whether a heart appears filled or empty
+        setLikedArtworks(prev => {
+          const newSet = new Set(prev);
+          // if the artwork is currently in the set of likes, we remove it, meaning the user is unliking
+          if (newSet.has(artworkId)) {
+            newSet.delete(artworkId);
+            // if the artwork is not in the set, then we add it, meaning the user likes it
+          } else {
+            newSet.add(artworkId);
+          }
+          return newSet;
+        });
       }
     } catch (error) {
       console.error('Error liking artwork:', error);
@@ -82,10 +95,16 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
                   {/* If author exists, then render the following */}
                   {canvas.author && (
                     <div className="mt-4 flex items-center">
-                      <div className="h-10 w-10 rounded-full bg-gray-200" />
+                      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden" >
+                        <img
+                          src={user?.imageUrl}
+                          alt={`${canvas.author.name}'s profile`}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
                       <div className="ml-3">
                         <p className="text-sm font-medium text-gray-900">
-                          {canvas.author.name}
+                          {canvas.author.name} {canvas.author.email}
                         </p>
                       </div>
                     </div>
@@ -102,7 +121,11 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
                     className='ml-1 cursor-pointer transition-colors hover:text-red-500'
                     onClick={async (e) => handleLike(canvas.id, e)}
                   >
-                    <HeartStraight size={24} />
+                    <HeartStraight
+                      size={24}
+                      weight={likedArtworks.has(canvas.id) ? 'fill' : 'regular'}
+                      className={likedArtworks.has(canvas.id) ? 'text-red-500' : ''}
+                    />
                   </div>
                 </div>
               </div>

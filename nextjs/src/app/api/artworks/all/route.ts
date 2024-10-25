@@ -1,38 +1,40 @@
-import { NextResponse } from 'next/server'
-import { prisma } from "@/lib/db/index"
+import { prisma } from '@/lib/db/index';
+import { clerkClient } from '@clerk/nextjs/server';
+import type { User } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
-// This handles GET requests to /api/artworks/all
-export async function GET(request: Request) {
+export async function GET() {
   try {
+    // Get artworks with authors from Prisma
     const artworks = await prisma.artwork.findMany({
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        configuration: true,
-        likes: true,
-        createdAt: true,
-        author: {
-          select: {
-            id: true,
-            username: true,
-            name: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      include: { author: true }
     });
 
-    if (artworks.length === 0) {
-      return NextResponse.json({ error: 'No artworks found' }, { status: 404});
-    }
+    // Get all unique author IDs
+    const authorIds = Array.from(new Set(artworks.map(artwork => artwork.authorId)));
 
-    return NextResponse.json(artworks, { status: 200 });
+    // First get the clerk client
+    const clerk = await clerkClient();
+    // Then use it to fetch users
+    const clerkUsers = await clerk.users.getUserList({
+      userId: authorIds,
+    });
 
+    // Combine Prisma and Clerk data
+    const enrichedArtworks = artworks.map(artwork => {
+      const clerkUser = clerkUsers.data.find((user: User) => user.id === artwork.authorId);
+      return {
+        ...artwork,
+        author: {
+          ...artwork.author,
+          imageUrl: clerkUser?.imageUrl
+        }
+      };
+    });
+
+    return NextResponse.json(enrichedArtworks);
   } catch (error) {
     console.error('Error fetching artworks:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch artworks' }, { status: 500 });
   }
 }

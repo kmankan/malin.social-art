@@ -1,4 +1,4 @@
-import { Artwork, User } from '@prisma/client'
+import { Artwork, User, Favourite } from '@prisma/client'
 import { Prisma } from '@prisma/client'
 
 export type CreateArtworkData = {
@@ -53,6 +53,7 @@ export type ArtworkWithAuthor = {
     bio: string | null;
     createdAt: Date;
     updatedAt: Date;
+    imageUrl?: string;  // Add this line for the Clerk image URL
   };
 }
 
@@ -62,3 +63,21 @@ export type ArtworkWithAuthor = {
 export type ArtworkBasic = Prisma.ArtworkGetPayload<{}>  // No includes
 export type ArtworkBelongingToAuthor = Prisma.ArtworkGetPayload<{ include: { author: true } }>
 export type ArtworkWithFavorites = Prisma.ArtworkGetPayload<{ include: { favourite: true } }>
+export type ArtworkWithAuthorAndFavoritesAndUsers = Prisma.ArtworkGetPayload<{
+  select: {
+    id: true,
+    title: true,
+    description: true,
+    authorId: true,
+    createdAt: true,
+    updatedAt: true,
+    likes: true,
+    state: true,
+    author: true,
+    favourite: {
+      include: {
+        user: true
+      }
+    }
+  }
+}>
