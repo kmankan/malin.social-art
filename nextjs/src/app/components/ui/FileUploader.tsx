@@ -1,10 +1,11 @@
 'use client'
 import { useState } from 'react';
-import Image from 'next/image'
+import Image from 'next/image';
 
 // this page will allow the user to upload an artwork they like;
 export function FileUploader() {
   const [preview, setPreview] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
 
   // handles the onChange event of the input element
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,12 +28,38 @@ export function FileUploader() {
     }
   }
 
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();  // Prevent form submission
+    if (!file) {
+      alert('No file found');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) throw new Error('Upload failed');
+
+      const data = await response.json()
+      console.log('Upload successful:', data)
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Upload failed!');
+    }
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-rose-50">
-      <main className="flex-grow p-8 border-2">
-        <div className="p-6 rounded-lg shadow-md">
-          <form className="space-y-4">
-            <div className='flex flex-col'>
+      <main className="flex-grow p-8 flex items-start justify-center">
+        <div className="p-6 rounded-lg shadow-md w-full max-w-2xl">
+          <form onSubmit={handleUpload} className="space-y-4 flex flex-col">
+            <div className='text-center'>
               <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-4">
                 Choose artwork to upload
               </label>
@@ -51,22 +78,25 @@ export function FileUploader() {
               />
             </div>
             {preview && (
-              <div className='mt-4 relative max-w-lg aspect-[4/3]'>
+              // child image container gets positioned 'relative' to parents
+              <div className='mt-4 relative mx-auto w-full max-w-lg aspect-[4/3]'>
                 <Image
                   src={preview}
                   alt="Preview"
                   fill
-                  className='object-contain rounded-lg'
+                  className='object-contain rounded-lg' //contain shows the whole image, maintaining ratio
                   unoptimized
                 />
               </div>
             )}
-            <button
-              type="submit"
-              className="px-4 py-2 mx-2 bg-rose-600 text-white rounded-md hover:bg-rose-700"
-            >
-              Upload
-            </button>
+            <div className='flex justify-center'>
+              <button
+                type="submit"
+                className="px-4 py-2 mx-2 bg-rose-600 text-white rounded-md hover:bg-rose-700"
+              >
+                Upload
+              </button>
+            </div>
           </form>
         </div>
       </main>
