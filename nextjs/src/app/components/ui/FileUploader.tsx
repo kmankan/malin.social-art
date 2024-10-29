@@ -7,6 +7,15 @@ export function FileUploader() {
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
 
+  async function getPresignedUrl(filename: string) {
+    const response = await fetch('/api/getPresignedUrl', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename })
+    });
+    return response.json();
+  }
+
   // handles the onChange event of the input element
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // e.target.files is an array-like object containing all files selected
@@ -30,6 +39,9 @@ export function FileUploader() {
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();  // Prevent form submission
+    // 1. Get the presigned URL
+    const { presignedUrl } = await getPresignedUrl(file.name);
+
     if (!file) {
       alert('No file found');
       return;
@@ -38,6 +50,9 @@ export function FileUploader() {
     try {
       const formData = new FormData();
       formData.append('image', file)
+      // the browser chunks the file
+      // the file is encoded into multipart/form-data format and sent as http request stream
+      // the server recieves this as a stream
 
       const response = await fetch('/api/upload', {
         method: 'POST',
