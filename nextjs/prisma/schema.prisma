@@ -10,13 +10,19 @@ datasource db {
 
 model Artwork {
   id          String      @id @default(cuid())
-  title       String
+  title       String?
   description String?
-  authorId    String // this is store the clerk_id
+  authorId    String // clerk_id
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   likes       Int
   state       Json
+  // Make file-related fields optional
+  s3Key       String?     @unique
+  fileUrl     String?
+  fileType    String?
+  fileName    String?
+  // Relations
   author      User        @relation(fields: [authorId], references: [clerk_id])
   favourite   Favourite[]
 }

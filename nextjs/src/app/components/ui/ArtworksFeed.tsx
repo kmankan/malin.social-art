@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { RotatingBoxesCanvas } from './RotatingBoxesCanvas';
 import { HeartStraight } from 'phosphor-react'
 import Image from 'next/image';
+import { UploadedImageCanvas } from './UploadedImageCanvas';
 // types
 import { ArtworkWithAuthor } from '@/types';
 
@@ -79,13 +80,20 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
               className="mb-8 rounded-2xl bg-slate-100 shadow-lg hover:shadow-xl 
               transition-all duration-300 p-6 border-4 border-orange-700"
             >
-              <div className="border-2 aspect-[4/3] w-full">
-                <RotatingBoxesCanvas
-                  initialBoxes={canvas.state.boxes}
-                  initialBackgroundColor={canvas.state.backgroundColor}
-                  initialSelectedBox={canvas.state.selectedBoxId}
+              {canvas.s3Key && canvas.fileUrl && canvas.fileName ? (
+                <UploadedImageCanvas
+                  fileUrl={canvas.fileUrl}
+                  fileName={canvas.fileName}
                 />
-              </div>
+              ) : (
+                <div className="border-2 aspect-[4/3] w-full">
+                  <RotatingBoxesCanvas
+                    initialBoxes={canvas.state.boxes}
+                    initialBackgroundColor={canvas.state.backgroundColor}
+                    initialSelectedBox={canvas.state.selectedBoxId}
+                  />
+                </div>
+              )}
               <div
                 className='flex justify-between'
                 id="artworkMetadata">

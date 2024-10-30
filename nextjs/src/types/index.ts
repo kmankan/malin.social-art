@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { Prisma, Artwork } from '@prisma/client'
 
 export type CreateArtworkData = {
   title: string;
@@ -36,13 +36,17 @@ export type BoxesCanvas = {
 
 export type ArtworkWithAuthor = {
   id: string;
-  title: string;
+  title: string | null;
   description: string | null;
   authorId: string;
   createdAt: Date;
   updatedAt: Date;
   likes: number;
   state: AnimationState;
+  s3Key: string | null;
+  fileUrl: string | null;
+  fileType: string | null;
+  fileName: string | null;
   author: {
     id: string;
     clerk_id: string;
@@ -52,7 +56,7 @@ export type ArtworkWithAuthor = {
     bio: string | null;
     createdAt: Date;
     updatedAt: Date;
-    imageUrl?: string;  // Add this line for the Clerk image URL
+    imageUrl?: string;  // Clerk-specific field
   };
 }
 
@@ -79,3 +83,34 @@ export type ArtworkWithAuthorAndFavoritesAndUsers = Prisma.ArtworkGetPayload<{
     }
   }
 }>
+
+// Request types
+export interface PresignedUrlRequest {
+  fileName: string;
+  fileType: string;
+}
+
+// Response types
+export interface PresignedUrlResponse {
+  presignedUploadUrl: string;
+  key: string;
+}
+
+// Optional: If you need to type the upload response
+export interface UploadResponse {
+  success: boolean;
+  error?: string;
+}
+
+// Optional: If you need to type the full upload result
+export interface FileUploadResult {
+  S3key: string;
+  clerk_id: string;
+  fileName: string;
+  fileType: string;
+}
+
+export interface UploadCompleteResponse {
+  success: boolean;
+  artwork: Artwork;
+}

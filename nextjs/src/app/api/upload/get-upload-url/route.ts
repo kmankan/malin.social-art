@@ -1,9 +1,12 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { PresignedUrlRequest, PresignedUrlResponse } from '@/types/index';
 
 export async function POST(request: Request) {
-  const { filename } = await request.json();
+  const { fileName, fileType }: PresignedUrlRequest = await request.json();
   
+  const key = `uploads/${Date.now()}-${fileName}`;
+
   const s3Client = new S3Client({
     region: process.env.AWS_REGION,
     credentials: {
@@ -12,17 +15,19 @@ export async function POST(request: Request) {
     }
   });
 
-  // Create command for the future PUT operation
   const command = new PutObjectCommand({
-    Bucket: 'your-bucket-name',
-    Key: filename,
-    ContentType: 'image/jpeg' // Or determine dynamically
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: key,
+    ContentType: fileType
   });
 
-  // Generate presigned URL (valid for 1 hour)
-  const presignedUrl = await getSignedUrl(s3Client, command, {
+  const presignedUploadUrl = await getSignedUrl(s3Client, command, {
     expiresIn: 3600
   });
 
-  return Response.json({ presignedUrl });
+  return Response.json({
+    presignedUploadUrl,
+    key
+  } as PresignedUrlResponse);
 }
+
