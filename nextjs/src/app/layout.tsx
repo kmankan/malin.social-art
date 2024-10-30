@@ -2,6 +2,7 @@ import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@c
 import Link from 'next/link';
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { DotPattern } from "@/components/ui/dot-pattern"
 import "./globals.css";
 
 const geistSans = localFont({
@@ -24,31 +25,36 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <div className="p-4 bg-rose-100 flex justify-center border-2 border-amber-800">
-            <div className='flex justify-between items-center w-full'>
-              <div className='w-7/12 flex justify-end'>
-                <a href="/" className="text-2xl font-mono text-center">The Social Art Platform</a>
-              </div>
-              <div>
-                <nav className="space-x-4">
-                  <Link href="/" className="text-lg">Feed</Link>
-                  <Link href="/create" className="text-lg">Create</Link>
-                  <Link href="/upload" className="text-lg">Upload</Link>
-                  <Link href="/profile" className="text-lg">Profile</Link>
-                </nav>
-              </div>
-              <div className=''>
-                <SignedOut>
-                  <SignInButton />
-                </SignedOut>
-                <SignedIn>
-                  <UserButton />
-                </SignedIn>
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-rose-50`}>
+          <DotPattern
+            className="fixed inset-0 opacity-80 pointer-events-none"
+          />
+          <div className="relative">
+            <div className="p-4 bg-rose-100 flex justify-center border-2 border-amber-800">
+              <div className='flex justify-between items-center w-full'>
+                <div className='w-7/12 flex justify-end'>
+                  <a href="/" className="text-2xl font-mono text-center">The Social Art Platform</a>
+                </div>
+                <div>
+                  <nav className="space-x-4">
+                    <Link href="/" className="text-lg">Feed</Link>
+                    <Link href="/create" className="text-lg">Create</Link>
+                    <Link href="/upload" className="text-lg">Upload</Link>
+                    <Link href="/profile" className="text-lg">Profile</Link>
+                  </nav>
+                </div>
+                <div className=''>
+                  <SignedOut>
+                    <SignInButton />
+                  </SignedOut>
+                  <SignedIn>
+                    <UserButton />
+                  </SignedIn>
+                </div>
               </div>
             </div>
+            <main>{children}</main>
           </div>
-          <main>{children}</main>
         </body>
       </html>
     </ClerkProvider>

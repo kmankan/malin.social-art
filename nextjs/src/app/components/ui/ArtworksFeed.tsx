@@ -72,7 +72,7 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
   };
 
   return (
-    <div className="flex min-h-screen bg-rose-50">
+    <div className="flex min-h-screen">
       <main className="flex w-screen">
         <div
           id="feed"
