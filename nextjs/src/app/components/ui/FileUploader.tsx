@@ -2,12 +2,13 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useUser } from '@clerk/clerk-react';
-import { PresignedUrlRequest, PresignedUrlResponse, UploadResponse, FileUploadResult } from '@/types/index';
+import { PresignedUrlRequest, PresignedUrlResponse, UploadResponse } from '@/types/index';
 
 // this page will allow the user to upload an artwork they like;
 export function FileUploader() {
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const { user } = useUser();
 
   // returns a presigned URL for file uploads
@@ -31,16 +32,39 @@ export function FileUploader() {
     file: File
   ): Promise<UploadResponse> => {
     try {
-      const uploadResponse = await fetch(presignedUrl, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': file.type,
-        }
+      const xhr = new XMLHttpRequest();
+      console.log('Starting upload with XMLHttpRequest...');
+
+      const uploadPromise = new Promise<UploadResponse>((resolve, reject) => {
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 100);
+            console.log(`Upload progress: ${progress}%`);
+            console.log('Bytes loaded:', event.loaded, 'Total bytes:', event.total);
+            setUploadProgress(progress);
+          }
+        });
+
+        xhr.addEventListener('load', () => {
+          console.log('Upload complete! Status:', xhr.status);
+          resolve({ success: xhr.status >= 200 && xhr.status < 300 });
+        });
+
+        xhr.addEventListener('error', () => {
+          console.error('XHR upload failed with error:', xhr.status);
+          reject(new Error('Upload failed'));
+        });
       });
 
-      return { success: uploadResponse.ok };
+      console.log('Opening XHR connection to:', presignedUrl);
+      xhr.open('PUT', presignedUrl);
+      xhr.setRequestHeader('Content-Type', file.type);
+      console.log('Sending file:', file.name, 'Size:', file.size, 'bytes');
+      xhr.send(file);
+
+      return await uploadPromise;
     } catch (error) {
+      console.error('Upload error in catch block:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -73,6 +97,7 @@ export function FileUploader() {
 
   const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setUploadProgress(0); // Reset progress at start
     console.log('Starting upload process...');
 
     if (!file) {
@@ -162,7 +187,18 @@ export function FileUploader() {
                 />
               </div>
             )}
-            <div className='flex justify-center'>
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div
+                  className="bg-rose-600 h-2.5 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+                <p className="text-sm text-gray-600 text-center mt-1">
+                  {uploadProgress}%
+                </p>
+              </div>
+            )}
+            <div className='flex justify-center pt-8'>
               <button
                 type="submit"
                 className="px-4 py-2 mx-2 bg-rose-600 text-white rounded-md hover:bg-rose-700"
