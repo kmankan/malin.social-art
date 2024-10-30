@@ -4,8 +4,8 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model Artwork {
@@ -29,7 +29,7 @@ model Artwork {
 
 model User {
   id         String      @id @default(cuid())
-  clerk_id   String      @unique // Add this new field
+  clerk_id   String      @unique
   username   String?     @unique
   email      String      @unique
   name       String?
@@ -40,7 +40,7 @@ model User {
   favourites Favourite[]
 
   @@index([username])
-  @@index([clerk_id]) // Add index for clerk_id
+  @@index([clerk_id])
 }
 
 model Favourite {
