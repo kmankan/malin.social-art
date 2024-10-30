@@ -9,8 +9,12 @@ import { UploadedImageCanvas } from './UploadedImageCanvas';
 import { ArtworkWithAuthor } from '@/types';
 
 export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWithAuthor[] }) => {
-  // store in state an array of objects structured like ArtworkWithAuthor
-  const [artworks, setArtworks] = useState<ArtworkWithAuthor[]>(initialArtworks);
+  // Sort artworks by createdAt date in descending order (newest first)
+  const [artworks, setArtworks] = useState<ArtworkWithAuthor[]>(
+    [...initialArtworks].sort((a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+  );
   // store in state all of the artworks the user has already liked
   const [likedArtworks, setLikedArtworks] = useState<Set<string>>(new Set());
 
