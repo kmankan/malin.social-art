@@ -3,6 +3,8 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useUser } from '@clerk/clerk-react';
 import { PresignedUrlRequest, PresignedUrlResponse, UploadResponse } from '@/types/index';
+import { ProgressBar } from "@/app/components/ui/ProgressBar"
+
 
 // this page will allow the user to upload an artwork they like;
 export function FileUploader() {
@@ -188,14 +190,8 @@ export function FileUploader() {
               </div>
             )}
             {uploadProgress > 0 && uploadProgress < 100 && (
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  className="bg-rose-600 h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
-                ></div>
-                <p className="text-sm text-gray-600 text-center mt-1">
-                  {uploadProgress}%
-                </p>
+              <div>
+                <ProgressBar progressValue={uploadProgress} />
               </div>
             )}
             <div className='flex justify-center pt-8'>
@@ -205,6 +201,8 @@ export function FileUploader() {
               >
                 Upload
               </button>
+            </div>
+            <div className='flex justify-center'>
             </div>
           </form>
         </div>

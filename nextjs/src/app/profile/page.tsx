@@ -1,35 +1,46 @@
 import { prisma } from '@/lib/db/index'
-import { Artwork, User } from '@prisma/client'
-import { AnimationState } from '@/types';
+import { ArtworkWithAuthor } from '@/types/index';
 import ArtworkFeed from '../components/ui/ArtworksFeed'
 import { currentUser } from '@clerk/nextjs/server'
+import { getEnrichedArtworks } from '@/lib/utils/artworks';
 
 export default async function Page() {
+
   const user = await currentUser();
 
   if (!user) {
     return <div>Please log in to view your profile</div>;
   }
 
-  const artworks = (await prisma.artwork.findMany({
+  const userAndFavouritesArtwork = await prisma.artwork.findMany({
     where: {
-      authorId: user.id
+      OR: [
+        { authorId: user.id },
+        {
+          favourite: {
+            some: {
+              userId: user.id
+            }
+          }
+        }
+      ]
     },
-    include: { author: true }
-  })) as (Artwork & { author: User, state: AnimationState })[];
+    include: {
+      author: true
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  }) as ArtworkWithAuthor[];
 
-  // Server-side log (will appear in terminal)
-  console.log('Server-side artworks:', artworks);
+  const userArtworksAndFavouritesEnriched = await getEnrichedArtworks(userAndFavouritesArtwork);
 
   return (
     <div className="w-full">
-      {artworks.length === 0 ? (
+      {userAndFavouritesArtwork.length === 0 ? (
         <div>No artworks found</div>
       ) : (
-        <>
-          <ArtworkFeed artworks={artworks} />
-          <div>Found {artworks.length} artwork(s)</div>
-        </>
+        <ArtworkFeed artworks={userArtworksAndFavouritesEnriched} />
       )}
     </div>
   );

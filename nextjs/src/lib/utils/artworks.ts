@@ -1,12 +1,8 @@
-import { prisma } from '@/lib/db/index';
 import { clerkClient } from '@clerk/nextjs/server';
 import { ArtworkWithAuthor } from '@/types';
+import { ArtworkBelongingToAuthor } from '@/types';
 
-export async function getEnrichedArtworks() {
-  // Get artworks with authors from Prisma
-  const artworks = await prisma.artwork.findMany({
-    include: { author: true }
-  });
+export async function getEnrichedArtworks(artworks: ArtworkBelongingToAuthor[]) {
 
   // Get all unique author IDs
   const authorIds = Array.from(new Set(artworks.map(artwork => artwork.authorId)));

@@ -1,20 +1,26 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { clerkMiddleware } from '@clerk/nextjs/server'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-// define protected routes - restrict these routes to signed in users only
-//const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)', '/api/sync'])
+// define public routes
+const isPublicRoute = createRouteMatcher([
+  '/',                    // home/feed
+  '/sign-in(.*)',          // sign in and all sub-routes (simplified pattern)
+  'sign-up(.*)',          // sign up and all sub-routes (simplified pattern)
+  '/api/artworks/liked',  // public API for fetching likes
+  '/api/sync',           // your existing sync route
+]);
 
 // We use clerkMiddleware as the default export, passing it an async function.
 export default clerkMiddleware(async (auth, request: NextRequest) => {
   console.log("clerk middleware is running")
-  
+
   // get the clerk_id from the auth() function
   const { userId } = await auth()
   
-  if (!userId) {
+  if (!isPublicRoute(request)) {
     console.error('Error: userId not found');
-    return NextResponse.next();
+    await auth.protect()
   }
 
   // Create the response object early so we can modify cookies
