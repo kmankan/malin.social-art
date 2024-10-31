@@ -22,7 +22,9 @@ export async function GET() {
 
     // Combine Prisma and Clerk data
     const enrichedArtworks = artworks.map(artwork => {
+      // store in an array all of the Clerk users that have artworks created
       const clerkUser = clerkUsers.data.find((user: User) => user.id === artwork.authorId);
+      // append to the artwork object the authors avatar from Clerk
       return {
         ...artwork,
         author: {

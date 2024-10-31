@@ -5,6 +5,7 @@ import { RotatingBoxesCanvas } from './RotatingBoxesCanvas';
 import { HeartStraight } from 'phosphor-react'
 import Image from 'next/image';
 import { UploadedImageCanvas } from './UploadedImageCanvas';
+import { SignIn, useUser } from "@clerk/nextjs";
 // types
 import { ArtworkWithAuthor } from '@/types';
 
@@ -17,18 +18,27 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
   );
   // store in state all of the artworks the user has already liked
   const [likedArtworks, setLikedArtworks] = useState<Set<string>>(new Set());
+  const [showSignIn, setShowSignIn] = useState(false);
+  const user = useUser();
 
   // when the page loads, get all of the artworks a user has liked and store in state
   useEffect(() => {
+    if (!user.isSignedIn) return;
+
     const fetchLikeStatuses = async () => {
       try {
         const response = await fetch('/api/artworks/liked');
         if (response.ok) {
           const likedArtworkIds: string[] = await response.json();
-          setLikedArtworks(new Set(likedArtworkIds)); // Valid: string[] -> Set<string>
+          setLikedArtworks(new Set(likedArtworkIds));
+        } else {
+          // For any non-ok response (including 401), just set empty likes
+          setLikedArtworks(new Set());
         }
       } catch (error) {
         console.error('Error fetching like statuses:', error);
+        // On error, ensure likes are empty
+        setLikedArtworks(new Set());
       }
     };
     fetchLikeStatuses();
@@ -40,34 +50,45 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
       const response = await fetch(`/api/artworks/${artworkId}/like`, {
         method: 'POST',
       });
-      if (response.ok) {
-        const updatedArtworkMetadata = await response.json();
-        // Update the specific artwork's likes in state
-        // map through each artwork until we find the current one, and update that object
-        setArtworks(currentArtworks =>
-          currentArtworks.map(artwork =>
-            artwork.id === artworkId
-              ? { ...artwork, likes: updatedArtworkMetadata.likes }
-              : artwork
-          )
-        );
 
-        // Toggle based on current state instead
-        // the current state determines whether a heart appears filled or empty
-        setLikedArtworks(prev => {
-          const newSet = new Set(prev);
-          // if the artwork is currently in the set of likes, we remove it, meaning the user is unliking
-          if (newSet.has(artworkId)) {
-            newSet.delete(artworkId);
-            // if the artwork is not in the set, then we add it, meaning the user likes it
-          } else {
-            newSet.add(artworkId);
-          }
-          return newSet;
-        });
+      // Handle different response statuses
+      switch (response.status) {
+        case 401: // Unauthorized
+          setShowSignIn(true);
+          return;
+
+        case 200: // Success
+          const data = await response.json();
+          setArtworks(currentArtworks =>
+            currentArtworks.map(artwork =>
+              artwork.id === artworkId
+                ? { ...artwork, likes: data.likes }
+                : artwork
+            )
+          );
+
+          setLikedArtworks(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(artworkId)) {
+              newSet.delete(artworkId);
+            } else {
+              newSet.add(artworkId);
+            }
+            return newSet;
+          });
+          break;
+
+        default:
+          console.error('Unexpected response status:', response.status);
       }
     } catch (error) {
-      console.error('Error liking artwork:', error);
+      // Only log actual errors, not 401 redirects
+      if (error instanceof SyntaxError) {
+        // Ignore JSON parse errors from HTML responses
+        setShowSignIn(true);
+      } else {
+        console.error('Error liking artwork:', error);
+      }
     }
   };
 
@@ -146,6 +167,21 @@ export const ArtworkFeed = ({ artworks: initialArtworks }: { artworks: ArtworkWi
           ))}
         </div>
       </main>
+
+      {/* Sign-in modal */}
+      {showSignIn && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded-lg">
+            <SignIn fallbackRedirectUrl={window.location.href} />
+            <button
+              onClick={() => setShowSignIn(false)}
+              className="mt-4"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
