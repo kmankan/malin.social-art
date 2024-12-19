@@ -5,6 +5,9 @@ import { useUser } from '@clerk/clerk-react';
 import { PresignedUrlRequest, PresignedUrlResponse, UploadResponse } from '@/types/index';
 import { ProgressBar } from "@/app/components/ui/ProgressBar"
 
+// Add these constants at the top, after imports
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+const MAX_FILE_SIZE_MB = 10; // for display purposes
 
 // this page will allow the user to upload an artwork they like;
 export function FileUploader() {
@@ -74,26 +77,43 @@ export function FileUploader() {
     }
   };
 
+  // Add type validation helper
+  function isValidFile(file: File): { valid: boolean; error?: string } {
+    if (!file.type.startsWith('image/')) {
+      return { valid: false, error: 'Please select a valid image file' };
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      return { valid: false, error: `File size must be less than ${MAX_FILE_SIZE_MB}MB` };
+    }
+    return { valid: true };
+  }
+
   // handles the onChange event of the input element
   const handleChooseFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     // e.target.files is an array-like object containing all files selected
     // / ?.[0] safely accessses the first file if any
-    const selectedFile: File | undefined = e.target.files?.[0];
-    // if a file was selected, create a FileReader object, a built in browser API for reading file contents
+    const selectedFile = e.target.files?.[0];
+    // if a file was selected, validate and process it
     if (selectedFile) {
-      console.log('this is the file', selectedFile, selectedFile.name, selectedFile.type)
-      setFile(selectedFile)
-      const reader = new FileReader();
-      // onloadend is an event handler that runs when the reading operation is complete
-      reader.onloadend = () => {
-        // this sets up an event listener for when reading completes
-        // reader.result contains the files content as Base64 encoded string
-        // like this: data:image/jpeg;base64,/9j/4AAQSkZJRg...
-        // sets preview to be image source
-        setPreview(reader.result as string);
-      };
-      // We start to read the file contents
-      reader.readAsDataURL(selectedFile);
+      const validation = isValidFile(selectedFile);
+      if (validation.valid) {
+        console.log('File type:', selectedFile.type); // e.g., "image/jpeg", "image/png"
+        setFile(selectedFile);
+        const reader = new FileReader();
+        // onloadend is an event handler that runs when the reading operation is complete
+        reader.onloadend = () => {
+          // this sets up an event listener for when reading completes
+          // reader.result contains the files content as Base64 encoded string
+          // like this: data:image/jpeg;base64,/9j/4AAQSkZJRg...
+          // sets preview to be image source
+          setPreview(reader.result as string);
+        };
+        // We start to read the file contents
+        reader.readAsDataURL(selectedFile);
+      } else {
+        alert(validation.error);
+        e.target.value = ''; // Reset the input
+      }
     }
   }
 
@@ -129,6 +149,7 @@ export function FileUploader() {
         body: JSON.stringify({
           fileName: file.name,
           fileType: file.type,
+          fileSize: file.size,
           S3key: key,
           clerk_id: user?.id
         })
@@ -167,7 +188,7 @@ export function FileUploader() {
                 type="file"
                 id="image_upload"
                 name="image_uploads"
-                accept="image/*, .pdf"
+                accept="image/*"
                 onChange={handleChooseFile}
                 className="mt-1 text-sm text-gray-500 mb-4
                   file:mr-4 file:py-2 file:px-4

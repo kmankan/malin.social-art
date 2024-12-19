@@ -2,13 +2,35 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/index';  // Assuming you're using Prisma or similar
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+
+function isValidFile(fileType: string, fileSize: number): { valid: boolean; error?: string } {
+  if (!fileType.startsWith('image/')) {
+    return { valid: false, error: 'Only image files are allowed' };
+  }
+  if (fileSize > MAX_FILE_SIZE) {
+    return { valid: false, error: 'File size exceeds 10MB limit' };
+  }
+  return { valid: true };
+}
+
 export async function POST(request: Request) {
   try {
-    const { fileName, fileType, S3key, clerk_id } = await request.json();
+    const { fileName, fileType, S3key, clerk_id, fileSize } = await request.json();
 
-    if (!fileName || !S3key || !clerk_id) {
+    // Validate required fields
+    if (!fileName || !S3key || !clerk_id || !fileType || fileSize === undefined) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Validate file type and size
+    const validation = isValidFile(fileType, fileSize);
+    if (!validation.valid) {
+      return NextResponse.json(
+        { error: validation.error },
         { status: 400 }
       );
     }
